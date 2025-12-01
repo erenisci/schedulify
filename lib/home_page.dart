@@ -1276,6 +1276,7 @@ class _HomePageState extends State<HomePage>
                                 task: task,
                                 cardColor: cardColor,
                                 isCompleted: isCompletedForDate,
+                                isToday: isActuallyToday,
                                 isEditable: true,
                                 onToggle: isActuallyToday
                                     ? (_) => _toggleTask(task.id, targetDate)

@@ -12,12 +12,14 @@ class TaskCard extends StatelessWidget {
   final ValueChanged<bool?>? onToggle;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final bool isToday;
 
   const TaskCard({
     super.key,
     required this.task,
     required this.cardColor,
     required this.isCompleted,
+    required this.isToday,
     this.isEditable = true,
     this.onToggle,
     this.onEdit,
@@ -48,7 +50,8 @@ class TaskCard extends StatelessWidget {
       }
     }
 
-    bool showProgress = startDT != null && endDT != null && !isCompleted;
+    bool showProgress =
+        isToday && startDT != null && endDT != null && !isCompleted;
 
     return Card(
       key: ValueKey(task.id),
