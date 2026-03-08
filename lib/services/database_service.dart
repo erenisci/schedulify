@@ -28,7 +28,7 @@ class DatabaseService {
     return await Isar.open(
       [TaskSchema, SpecialDaySchema],
       directory: dir.path,
-      inspector: true,
+      inspector: false,
     );
   }
 

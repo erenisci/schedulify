@@ -1,88 +1,125 @@
-## Schedulify
+# Schedulify
 
-Schedulify is a modern, offline-first weekly planner designed specifically for the Windows desktop environment. It functions as a non-intrusive widget that resides in your system tray, helping you organize your recurring weekly tasks and special events without the clutter of a full-screen calendar.
+A modern, offline-first weekly planner built as a Windows desktop widget. Schedulify lives in your system tray and helps you manage recurring tasks and special events without the overhead of a full-screen calendar app.
 
-### Key Features
+---
 
-- **Weekly Recurrence Logic**: Tasks are designed to repeat weekly. Plan your routine once (e.g., "Gym every Monday"), and it stays there for every coming week.
-- **Smart Conflict Detection**: Prevents you from scheduling overlapping tasks (e.g., adding a task at 14:00 when you are already busy between 13:30 - 14:30).
-- **Offline-First & Persistent**: Powered by Isar Database. Your data lives locally on your machine. No internet connection required, no data lost on restart.
-- **Native Notifications**: Receive rich Windows toast notifications with sound when a task is due, even if the app is minimized.
-- **Special Days Engine**: Add birthdays, anniversaries, or deadlines via a custom calendar. The app highlights these days with a special banner and styling.
-- **System Tray Integration**: Minimizes to the system tray (next to the clock) to keep your taskbar clean. Runs silently in the background.
-- **Modern UI**:
-  - Dark Mode optimized.
-  - Custom Roboto typography.
-  - Clean Lucide iconography.
-  - Auto-sorting tasks by time.
-- **Startup Support**: Option to automatically launch when Windows starts.
+## Features
 
-### Installation
+| Feature | Description |
+|---|---|
+| **Weekly Recurrence** | Tasks repeat weekly by default. Set up your routine once — Schedulify keeps it for every coming week. |
+| **Time Conflict Detection** | Prevents overlapping tasks. Trying to add a task at 14:00 when 13:30–14:30 is already taken? The app will warn you. |
+| **Offline-First Storage** | Powered by Isar (embedded NoSQL). All data is stored locally — no internet required, no data lost on restart. |
+| **Native Notifications** | Windows toast notifications with optional sound alert when a task is due, even while minimized to tray. |
+| **Special Days** | Track birthdays, anniversaries, or deadlines via the built-in calendar. Days with events are highlighted with styled amber cards directly in the day view. |
+| **System Tray Integration** | Minimizes next to the clock. Right-click the tray icon to show or exit the app. |
+| **Auto-Launch on Startup** | Optionally launch with Windows so your schedule is always one click away. |
+| **Dark UI** | Optimized for dark environments. Roboto typography, Lucide icons, subtle progress bars for ongoing tasks. |
 
-You can download the latest version of Schedulify from the Releases Page.
+---
 
-1. Download the `.zip` file from releases.
-2. Extract it to a folder.
-3. Run `schedulify.exe`.
+## Installation
 
-### Development (For Contributors)
+Download the latest release from the [Releases](../../releases) page.
 
-If you want to build this project from source or contribute, follow these steps.
+1. Download and extract the `.zip` file.
+2. Run `schedulify.exe`.
 
-#### Prerequisites
+No installer required — it's fully portable.
 
-- Flutter SDK (Latest Stable)
-- Visual Studio (with C++ Desktop Development workload) for Windows runner.
+---
 
-#### Getting Started
+## Building from Source
 
-1. Clone the repository:
-   `git clone https://github.com/erenisci/schedulify.git`
-   `cd schedulify`
+### Prerequisites
 
-2. Install dependencies:
-   `flutter pub get`
+- [Flutter SDK](https://docs.flutter.dev/get-started/install/windows) (latest stable)
+- Visual Studio 2022 with the **Desktop development with C++** workload
 
-3. Generate Database Code:
-   Since this project uses Isar, you must run the build runner to generate the necessary serialization code (`task.g.dart`).
-   `flutter pub run build_runner build --delete-conflicting-outputs`
+### Steps
 
-4. Run the App:
-   `flutter run -d windows`
+```bash
+# 1. Clone the repository
+git clone https://github.com/erenisci/schedulify.git
+cd schedulify
 
-#### Building a Production Release
+# 2. Install dependencies
+flutter pub get
 
-To build the production Windows executable::
+# 3. Generate Isar schema code
+flutter pub run build_runner build --delete-conflicting-outputs
 
-1. Clean build cache:
-   `flutter clean`
-   `flutter pub get`
+# 4. Run in debug mode
+flutter run -d windows
+```
 
-2. Build a Windows release:
-   `flutter build windows`
+### Production Build
 
-Your compiled application will appear in: `build/windows/x64/runner/Release`
+```bash
+flutter clean
+flutter pub get
+flutter build windows
+```
 
-### Tech Stack
+Output: `build/windows/x64/runner/Release/`
 
-- **Framework**: Flutter (Dart)
-- **Database**: Isar (NoSQL, High Performance)
-- **State Management**: `setState` & Controllers (Optimized for Widget Performance)
-- **Window Management**: `window_manager`, `tray_manager`, `screen_retriever`
-- **Notifications**: `local_notifier`
-- **Assets**: `audioplayers` for custom sounds, `lucide_icons` for UI.
+---
 
-### Contributing
+## Running Tests
 
-Contributions, issues, and feature requests are welcome!
-Feel free to check the issues page.
+```bash
+flutter test
+```
 
-1. Fork the Project
-2. Create your Feature Branch (git checkout -b feature/AmazingFeature)
-3. Commit your Changes (git commit -m 'Add some AmazingFeature')
-4. Push to the Branch (git push origin feature/AmazingFeature)
+Tests cover the core `Task` model logic — completion tracking and time accessor correctness.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Flutter 3 (Dart) |
+| Database | [Isar](https://isar.dev) — embedded NoSQL, zero config |
+| Window Management | `window_manager`, `tray_manager`, `screen_retriever` |
+| Notifications | `local_notifier` (Windows toast) |
+| Audio | `audioplayers` |
+| UI | `lucide_icons`, Google Fonts (Roboto), `table_calendar` |
+| Persistence | `shared_preferences` (settings), Isar (task data) |
+
+---
+
+## Project Structure
+
+```
+lib/
+├── main.dart                  # Entry point, window positioning, theme setup
+├── home_page.dart             # Main UI, weekly tabs, task management logic
+├── task.dart                  # Task and SpecialDay data models (Isar collections)
+├── services/
+│   ├── database_service.dart  # Isar singleton — CRUD operations
+│   ├── settings_service.dart  # SharedPreferences wrapper for user settings
+│   └── time_ticker.dart       # ChangeNotifier timer for live UI updates
+└── widgets/
+    ├── task_card.dart         # Reusable task display card
+    └── task_progress_bar.dart # Linear progress indicator for active tasks
+```
+
+---
+
+## Contributing
+
+Contributions, issues, and feature requests are welcome.
+
+1. Fork the project
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m 'Add your feature'`
+4. Push to the branch: `git push origin feature/your-feature`
 5. Open a Pull Request
 
-### License
+---
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+## License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.

@@ -15,6 +15,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'package:package_info_plus/package_info_plus.dart';
+
 import 'services/database_service.dart';
 import 'services/settings_service.dart';
 import 'services/time_ticker.dart';
@@ -87,7 +89,6 @@ class RepeatPicker extends StatelessWidget {
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin, WindowListener, TrayListener {
   late TabController _tabController;
-  final ScrollController _scrollController = ScrollController();
 
   final DatabaseService _databaseService = DatabaseService();
   final SettingsService _settingsService = SettingsService();
@@ -108,6 +109,7 @@ class _HomePageState extends State<HomePage>
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   Task? _currentActiveTask;
+  String _appVersion = '';
 
   @override
   void initState() {
@@ -130,6 +132,7 @@ class _HomePageState extends State<HomePage>
     _loadStartupState();
     _loadSettings();
     _loadData();
+    _loadAppVersion();
     _startNotificationChecker();
   }
 
@@ -150,6 +153,13 @@ class _HomePageState extends State<HomePage>
         _enableNotifications = valNotif;
         _playNotificationSound = valNotifSound;
       });
+    }
+  }
+
+  Future<void> _loadAppVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() => _appVersion = info.version);
     }
   }
 
@@ -252,7 +262,6 @@ class _HomePageState extends State<HomePage>
     trayManager.removeListener(this);
     _notificationTimer?.cancel();
     _tabController.dispose();
-    _scrollController.dispose();
     _audioPlayer.dispose();
     super.dispose();
   }
@@ -308,6 +317,21 @@ class _HomePageState extends State<HomePage>
 
     for (var task in todaysTasks) {
       bool isCompletedToday = task.isCompletedOn(now);
+
+      if (task.isNotified) {
+        // Reset the flag on day rollover so weekly tasks can notify again
+        // on their next occurrence. If the current time is earlier than
+        // the task's scheduled time, we have crossed midnight into a new day.
+        if (task.time != null) {
+          final taskMins = task.time!.hour * 60 + task.time!.minute;
+          final nowMins = now.hour * 60 + now.minute;
+          if (nowMins < taskMins) {
+            task.isNotified = false;
+            _databaseService.saveTask(task);
+          }
+        }
+        continue;
+      }
 
       if (task.time != null && !isCompletedToday && !task.isNotified) {
         if (task.time!.hour == now.hour && task.time!.minute == now.minute) {
@@ -423,7 +447,6 @@ class _HomePageState extends State<HomePage>
         );
       },
     );
-    await _loadData();
   }
 
   Future<void> _showEventsForDayDialog(DateTime date) async {
@@ -568,9 +591,9 @@ class _HomePageState extends State<HomePage>
           builder: (context, setStateDialog) {
             return AlertDialog(
               backgroundColor: const Color(0xFF252525),
-              title: const Text(
-                "Add Event",
-                style: TextStyle(
+              title: Text(
+                eventToEdit != null ? "Edit Event" : "Add Event",
+                style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.w600),
@@ -770,7 +793,7 @@ class _HomePageState extends State<HomePage>
     bool isCompletedForDate = task.isCompletedOn(targetDate);
 
     if (!isCompletedForDate) {
-      if (_playCompletionSound) _playSound('notification.mp3');
+      if (_playCompletionSound) _playSound('complete.mp3');
       task.completedDates = [...task.completedDates, dateKey];
     } else {
       task.completedDates =
@@ -1096,15 +1119,16 @@ class _HomePageState extends State<HomePage>
                               Theme.of(context).colorScheme.primary,
                           contentPadding: EdgeInsets.zero),
                       const Divider(color: Colors.white10),
-                      const ListTile(
+                      ListTile(
                           leading:
-                              Icon(LucideIcons.info, color: Colors.white70),
-                          title:
-                              Text("Version", style: TextStyle(fontSize: 14)),
+                              const Icon(LucideIcons.info, color: Colors.white70),
+                          title: const Text(
+                              "Version", style: TextStyle(fontSize: 14)),
                           contentPadding: EdgeInsets.zero,
-                          trailing: Text("1.0.0",
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 12))),
+                          trailing: Text(
+                              _appVersion.isEmpty ? '...' : _appVersion,
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 12))),
                       const SizedBox(height: 10),
                     ])));
           });
@@ -1244,21 +1268,121 @@ class _HomePageState extends State<HomePage>
           ),
           const SizedBox(height: 16),
           if (dayEvents.isNotEmpty)
-            Column(
-                children: dayEvents
-                    .map((d) => Container(
-                        padding: const EdgeInsets.all(8),
-                        margin: const EdgeInsets.only(bottom: 8),
-                        color: Colors.white10,
-                        child: Text(d.title)))
-                    .toList()),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8, right: 16),
+              child: Column(
+                children: dayEvents.map((d) {
+                  String? timeLabel;
+                  if (d.time != null) {
+                    timeLabel = d.time!.format(context);
+                    if (d.endTime != null) {
+                      timeLabel += ' – ${d.endTime!.format(context)}';
+                    }
+                  }
+
+                  String? repeatLabel;
+                  if (d.repetition == RepetitionType.monthly) {
+                    repeatLabel = 'Monthly';
+                  } else if (d.repetition == RepetitionType.yearly) {
+                    repeatLabel = 'Yearly';
+                  }
+
+                  return GestureDetector(
+                    onTap: () async {
+                      await _showSpecialDayForm(d.date, eventToEdit: d);
+                      await _loadData();
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: Colors.amber.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(LucideIcons.star,
+                              size: 14, color: Colors.amber),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  d.title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                if (timeLabel != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      timeLabel,
+                                      style: const TextStyle(
+                                        color: Colors.amber,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (repeatLabel != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                repeatLabel,
+                                style: const TextStyle(
+                                  color: Colors.amber,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           Expanded(
             child: dailyTasks.isEmpty
-                ? const Center(child: Text("No plans yet."))
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(LucideIcons.clipboardList,
+                            size: 36, color: Colors.white12),
+                        const SizedBox(height: 12),
+                        const Text(
+                          "No tasks for this day.",
+                          style: TextStyle(
+                              color: Colors.white38, fontSize: 14),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          "Tap + to add one.",
+                          style: TextStyle(
+                              color: Colors.white24, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  )
                 : ScrollConfiguration(
                     behavior: MouseScrollBehavior(),
                     child: ListView.builder(
-                      controller: _scrollController,
                       padding: const EdgeInsets.only(bottom: 0, right: 16),
                       itemCount: dailyTasks.length,
                       itemBuilder: (context, index) {
@@ -1270,20 +1394,17 @@ class _HomePageState extends State<HomePage>
                         return AnimatedBuilder(
                           animation: timeTicker,
                           builder: (context, _) {
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 0),
-                              child: TaskCard(
-                                task: task,
-                                cardColor: cardColor,
-                                isCompleted: isCompletedForDate,
-                                isToday: isActuallyToday,
-                                isEditable: true,
-                                onToggle: isActuallyToday
-                                    ? (_) => _toggleTask(task.id, targetDate)
-                                    : null,
-                                onEdit: () => _showTaskDialog(taskToEdit: task),
-                                onDelete: () => _deleteTask(task.id),
-                              ),
+                            return TaskCard(
+                              task: task,
+                              cardColor: cardColor,
+                              isCompleted: isCompletedForDate,
+                              isToday: isActuallyToday,
+                              isEditable: true,
+                              onToggle: isActuallyToday
+                                  ? (_) => _toggleTask(task.id, targetDate)
+                                  : null,
+                              onEdit: () => _showTaskDialog(taskToEdit: task),
+                              onDelete: () => _deleteTask(task.id),
                             );
                           },
                         );

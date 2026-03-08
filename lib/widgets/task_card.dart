@@ -65,10 +65,18 @@ class TaskCard extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            leading: Checkbox(
-              value: isCompleted,
-              activeColor: Theme.of(context).colorScheme.secondary,
-              onChanged: onToggle,
+            leading: Tooltip(
+              message: onToggle == null
+                  ? 'Toggling is only available for today'
+                  : '',
+              child: Opacity(
+                opacity: onToggle == null ? 0.4 : 1.0,
+                child: Checkbox(
+                  value: isCompleted,
+                  activeColor: Theme.of(context).colorScheme.secondary,
+                  onChanged: onToggle,
+                ),
+              ),
             ),
             title: Text(
               task.title,
