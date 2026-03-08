@@ -1359,20 +1359,20 @@ class _HomePageState extends State<HomePage>
             ),
           Expanded(
             child: dailyTasks.isEmpty
-                ? Center(
+                ? const Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(LucideIcons.clipboardList,
                             size: 36, color: Colors.white12),
-                        const SizedBox(height: 12),
-                        const Text(
+                        SizedBox(height: 12),
+                        Text(
                           "No tasks for this day.",
                           style: TextStyle(
                               color: Colors.white38, fontSize: 14),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
+                        SizedBox(height: 4),
+                        Text(
                           "Tap + to add one.",
                           style: TextStyle(
                               color: Colors.white24, fontSize: 12),
