@@ -28,11 +28,6 @@ void main() async {
 
   const double appWidth = 450;
   const double appHeight = 750;
-  // Margin from the right and bottom edges of the usable screen area.
-  // These account for the Windows taskbar and desktop padding.
-  const double windowMarginRight = 5.0;
-  const double windowMarginBottom = 50.0;
-
   WindowOptions windowOptions = const WindowOptions(
     size: Size(appWidth, appHeight),
     center: false,
@@ -47,8 +42,8 @@ void main() async {
     Size usableSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
     Offset usablePos = primaryDisplay.visiblePosition ?? const Offset(0, 0);
 
-    double newX = usablePos.dx + usableSize.width - appWidth - windowMarginRight;
-    double newY = usablePos.dy + usableSize.height - appHeight - windowMarginBottom;
+    double newX = usablePos.dx + (usableSize.width - appWidth) / 2;
+    double newY = usablePos.dy + (usableSize.height - appHeight) / 2;
 
     await windowManager
         .setBounds(Rect.fromLTWH(newX, newY, appWidth, appHeight));
