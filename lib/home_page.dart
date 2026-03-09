@@ -11,11 +11,10 @@ import 'package:intl/intl.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:local_notifier/local_notifier.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
-
-import 'package:package_info_plus/package_info_plus.dart';
 
 import 'services/database_service.dart';
 import 'services/settings_service.dart';
@@ -1120,10 +1119,10 @@ class _HomePageState extends State<HomePage>
                           contentPadding: EdgeInsets.zero),
                       const Divider(color: Colors.white10),
                       ListTile(
-                          leading:
-                              const Icon(LucideIcons.info, color: Colors.white70),
-                          title: const Text(
-                              "Version", style: TextStyle(fontSize: 14)),
+                          leading: const Icon(LucideIcons.info,
+                              color: Colors.white70),
+                          title: const Text("Version",
+                              style: TextStyle(fontSize: 14)),
                           contentPadding: EdgeInsets.zero,
                           trailing: Text(
                               _appVersion.isEmpty ? '...' : _appVersion,
@@ -1368,14 +1367,12 @@ class _HomePageState extends State<HomePage>
                         SizedBox(height: 12),
                         Text(
                           "No tasks for this day.",
-                          style: TextStyle(
-                              color: Colors.white38, fontSize: 14),
+                          style: TextStyle(color: Colors.white38, fontSize: 14),
                         ),
                         SizedBox(height: 4),
                         Text(
                           "Tap + to add one.",
-                          style: TextStyle(
-                              color: Colors.white24, fontSize: 12),
+                          style: TextStyle(color: Colors.white24, fontSize: 12),
                         ),
                       ],
                     ),

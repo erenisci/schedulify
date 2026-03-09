@@ -6,16 +6,16 @@ A modern, offline-first weekly planner built as a Windows desktop widget. Schedu
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| **Weekly Recurrence** | Tasks repeat weekly by default. Set up your routine once — Schedulify keeps it for every coming week. |
-| **Time Conflict Detection** | Prevents overlapping tasks. Trying to add a task at 14:00 when 13:30–14:30 is already taken? The app will warn you. |
-| **Offline-First Storage** | Powered by Isar (embedded NoSQL). All data is stored locally — no internet required, no data lost on restart. |
-| **Native Notifications** | Windows toast notifications with optional sound alert when a task is due, even while minimized to tray. |
-| **Special Days** | Track birthdays, anniversaries, or deadlines via the built-in calendar. Days with events are highlighted with styled amber cards directly in the day view. |
-| **System Tray Integration** | Minimizes next to the clock. Right-click the tray icon to show or exit the app. |
-| **Auto-Launch on Startup** | Optionally launch with Windows so your schedule is always one click away. |
-| **Dark UI** | Optimized for dark environments. Roboto typography, Lucide icons, subtle progress bars for ongoing tasks. |
+| Feature                     | Description                                                                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Weekly Recurrence**       | Tasks repeat weekly by default. Set up your routine once — Schedulify keeps it for every coming week.                                                      |
+| **Time Conflict Detection** | Prevents overlapping tasks. Trying to add a task at 14:00 when 13:30–14:30 is already taken? The app will warn you.                                        |
+| **Offline-First Storage**   | Powered by Isar (embedded NoSQL). All data is stored locally — no internet required, no data lost on restart.                                              |
+| **Native Notifications**    | Windows toast notifications with optional sound alert when a task is due, even while minimized to tray.                                                    |
+| **Special Days**            | Track birthdays, anniversaries, or deadlines via the built-in calendar. Days with events are highlighted with styled amber cards directly in the day view. |
+| **System Tray Integration** | Minimizes next to the clock. Right-click the tray icon to show or exit the app.                                                                            |
+| **Auto-Launch on Startup**  | Optionally launch with Windows so your schedule is always one click away.                                                                                  |
+| **Dark UI**                 | Optimized for dark environments. Roboto typography, Lucide icons, subtle progress bars for ongoing tasks.                                                  |
 
 ---
 
@@ -78,15 +78,15 @@ Tests cover the core `Task` model logic — completion tracking and time accesso
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Flutter 3 (Dart) |
-| Database | [Isar](https://isar.dev) — embedded NoSQL, zero config |
-| Window Management | `window_manager`, `tray_manager`, `screen_retriever` |
-| Notifications | `local_notifier` (Windows toast) |
-| Audio | `audioplayers` |
-| UI | `lucide_icons`, Google Fonts (Roboto), `table_calendar` |
-| Persistence | `shared_preferences` (settings), Isar (task data) |
+| Layer             | Technology                                              |
+| ----------------- | ------------------------------------------------------- |
+| Framework         | Flutter 3 (Dart)                                        |
+| Database          | [Isar](https://isar.dev) — embedded NoSQL, zero config  |
+| Window Management | `window_manager`, `tray_manager`, `screen_retriever`    |
+| Notifications     | `local_notifier` (Windows toast)                        |
+| Audio             | `audioplayers`                                          |
+| UI                | `lucide_icons`, Google Fonts (Roboto), `table_calendar` |
+| Persistence       | `shared_preferences` (settings), Isar (task data)       |
 
 ---
 
