@@ -8,7 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'home_page.dart';
+import 'splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
         ),
         cardColor: const Color(0xFF2C2C2C),
       ),
-      home: const HomePage(),
+      home: const SplashScreen(),
     );
   }
 }
